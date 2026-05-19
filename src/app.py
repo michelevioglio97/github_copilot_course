@@ -38,6 +38,42 @@ activities = {
         "schedule": "Mondays, Wednesdays, Fridays, 2:00 PM - 3:00 PM",
         "max_participants": 30,
         "participants": ["john@mergington.edu", "olivia@mergington.edu"]
+    },
+    "Basketball Team": {
+        "description": "Train and compete in inter-school basketball games",
+        "schedule": "Mondays and Thursdays, 4:00 PM - 6:00 PM",
+        "max_participants": 15,
+        "participants": ["nathan@mergington.edu", "zoe@mergington.edu"]
+    },
+    "Yoga Club": {
+        "description": "Practice yoga, mindfulness, and wellness exercises",
+        "schedule": "Wednesdays, 5:00 PM - 6:00 PM",
+        "max_participants": 20,
+        "participants": ["liam@mergington.edu", "ava@mergington.edu"]
+    },
+    "Art Club": {
+        "description": "Explore painting, drawing, and creative arts projects",
+        "schedule": "Tuesdays, 3:30 PM - 5:00 PM",
+        "max_participants": 18,
+        "participants": ["mia@mergington.edu", "lucas@mergington.edu"]
+    },
+    "Drama Club": {
+        "description": "Rehearse and perform plays and theatrical pieces",
+        "schedule": "Fridays, 3:30 PM - 5:30 PM",
+        "max_participants": 20,
+        "participants": ["ella@mergington.edu", "ethan@mergington.edu"]
+    },
+    "Debate Team": {
+        "description": "Practice debate skills and compete in tournaments",
+        "schedule": "Wednesdays, 4:00 PM - 5:30 PM",
+        "max_participants": 16,
+        "participants": ["chloe@mergington.edu", "james@mergington.edu"]
+    },
+    "Science Club": {
+        "description": "Explore science experiments, research, and inquiry",
+        "schedule": "Thursdays, 3:30 PM - 5:00 PM",
+        "max_participants": 22,
+        "participants": ["sophia@mergington.edu", "alex@mergington.edu"]
     }
 }
 
@@ -51,6 +87,18 @@ def root():
 def get_activities():
     return activities
 
+@app.delete("/activities/{activity_name}/participants")
+def remove_participant(activity_name: str, email: str):
+    """Remove a student from an activity"""
+    if activity_name not in activities:
+        raise HTTPException(status_code=404, detail="Activity not found")
+
+    activity = activities[activity_name]
+    if email not in activity["participants"]:
+        raise HTTPException(status_code=400, detail="Student is not signed up for this activity")
+
+    activity["participants"].remove(email)
+    return {"message": f"Unregistered {email} from {activity_name}"}
 
 @app.post("/activities/{activity_name}/signup")
 def signup_for_activity(activity_name: str, email: str):
@@ -59,6 +107,10 @@ def signup_for_activity(activity_name: str, email: str):
     if activity_name not in activities:
         raise HTTPException(status_code=404, detail="Activity not found")
 
+    # Validate student is not already signed up
+    if email in activities[activity_name]["participants"]:
+        raise HTTPException(status_code=400, detail="Student already signed up for this activity")  
+    
     # Get the specific activity
     activity = activities[activity_name]
 
